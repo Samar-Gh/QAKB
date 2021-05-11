@@ -1,20 +1,16 @@
-from parsing.lc_quad_linked import LC_Qaud_Linked
-from parsing.lc_quad import LC_QaudParser
-from common.container.sparql import SPARQL
-from common.container.answerset import AnswerSet
-from common.graph.graph import Graph
-from common.utility.stats import Stats
-from common.query.querybuilder import QueryBuilder
-import common.utility.utility as utility
-from linker.goldLinker import GoldLinker
-from linker.earl import Earl
-from learning.classifier.svmclassifier import SVMClassifier
 import json
-import argparse
 import logging
 import sys
-import os
-import numpy as np
+
+import common.utility.utility as utility
+from common.container.answerset import AnswerSet
+from common.container.sparql import SPARQL
+from common.graph.graph import Graph
+from common.query.querybuilder import QueryBuilder
+from common.utility.stats import Stats
+from linker.goldLinker import GoldLinker
+from parsing.lc_quad import LC_QaudParser
+from parsing.lc_quad_linked import LC_Qaud_Linked
 
 
 def safe_div(x, y):
@@ -119,7 +115,12 @@ if __name__ == "__main__":
     logger = logging.getLogger(__name__)
     utility.setup_logging()
 
-    ds = LC_Qaud_Linked(path="./data/LC-QUAD/linked_answer.json")
+    # data_path = "LC-QUAD"
+    # qald_path = "QALD/8/wikidata"
+    # qald_path = "QALD/8"
+    data_path = "QALD/9"
+
+    ds = LC_Qaud_Linked(path="./data/" + data_path + "/linked_answer.json")
     ds.load()
     ds.parse()
 
@@ -132,7 +133,11 @@ if __name__ == "__main__":
 
     stats = Stats()
     linker = GoldLinker()
-    output_file = 'lcquad_gold'
+
+    if data_path == "LC-QUAD":
+        output_file = 'lcquad_gold'
+    else:
+        output_file = 'qald_gold'
 
     tmp = []
     output = []
@@ -174,6 +179,14 @@ if __name__ == "__main__":
         json.dump(output, data_file, sort_keys=True, indent=4, separators=(',', ': '))
     print('stats: ', stats)
 
-    with open('na_list_lcquadgold.txt', 'w') as f:
+    output_na_list = "na_list_lcquadgold.txt"  # "LC-QUAD"
+    if data_path == "QALD/8/wikidata":
+        output_na_list = "na_list_qald8_wiki_gold.txt"
+    elif data_path == "QALD/8":
+        output_na_list = "na_list_qald8_gold.txt"
+    elif data_path == "QALD/9":
+        output_na_list = "na_list_qald9_gold.txt"
+
+    with open(output_na_list, 'w') as f:
         for i in na_list:
             f.write("{}\n".format(i))
